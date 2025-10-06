@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ni Modo Finanzas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2E7D32;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #388E3C;
+            border-bottom: 2px solid #81C784;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #4CAF50;
+            margin-top: 20px;
+        }
+        #productsList {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        #productsList:hover {
+            transform: translateY(-2px);
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #F1F8E9;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-info h4 {
+            margin: 0 0 5px 0;
+            color: #2E7D32;
+        }
+        .product-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .prices {
+            text-align: right;
+            margin-left: 20px;
+        }
+        .normal-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 14px;
+        }
+        .app-price {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .add-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .add-btn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388E3C 100%);
+        }
+        .add-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        form:hover {
+            transform: translateY(-2px);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #388E3C;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #C8E6C9;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388E3C 100%);
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #expensesList, #totalSavings, #chartContainer {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        #expensesList:hover, #totalSavings:hover, #chartContainer:hover {
+            transform: translateY(-2px);
+        }
+        .expense-item {
+            border-bottom: 1px solid #E8F5E8;
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #F1F8E9;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .expense-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .expense-item span {
+            font-size: 14px;
+            color: #2E7D32;
+        }
+        #totalSavings {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            color: #1B5E20;
+            border: 2px solid #81C784;
+        }
+        #chartContainer {
+            text-align: center;
+        }
+        canvas {
+            max-width: 300px;
+            height: 300px !important;
+            margin: 0 auto;
+        }
+        .savings-highlight {
+            color: #2E7D32;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+        #loginSection {
+            display: block;
+        }
+        #mainContent {
+            display: none;
+        }
+        #logoutBtn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            width: auto;
+            padding: 8px 16px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        #logoutBtn:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            padding: 8px 16px;
+            margin-left: 10px;
+            font-size: 14px;
+            width: auto;
+        }
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+        .login-error {
+            color: #d32f2f;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .date-form {
+            background: #F1F8E9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginSection">
+        <h1>Ni Modo Finanzas</h1>
+        <form id="loginForm">
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" required>
+            
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" required>
+            
+            <button type="submit">Iniciar Sesión</button>
+            <div id="loginError" class="login-error" style="display: none;">Usuario o contraseña incorrectos.</div>
+        </form>
+    </div>
+
+    <div id="mainContent">
+        <h1>Ni Modo Finanzas</h1>
+        <button id="logoutBtn" onclick="logout()">Cerrar Sesión</button>
+        
+        <div class="date-form">
+            <label for="purchaseDate">Fecha de Compra:</label>
+            <input type="date" id="purchaseDate" required>
+        </div>
+        
+        <div id="productsList">
+            <h2>Productos y Ofertas Exclusivas de la App</h2>
+            <p>Selecciona y agrega productos para documentar tus gastos y ahorros. Precios en $.</p>
+            <div id="productItems"></div>
+        </div>
+        
+        <div id="expensesList">
+            <h2>Gastos Documentados</h2>
+            <div id="listItems"></div>
+        </div>
+        
+        <div id="totalSavings">
+            Ahorro Total: $<span id="savingsAmount">0.00</span>
+        </div>
+        
+        <div id="chartContainer">
+            <h2>Gráfico de Gastos por Categoría</h2>
+            <canvas id="spendingChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Lista de productos predefinidos con precios
+        const products = [
+            {
+                name: "Entrada de Cine (Adulto)",
+                category: "Entretenimiento",
+                normalPrice: 150.00,
+                appPrice: 120.00
+            },
+            {
+                name: "Hamburguesa Combo",
+                category: "Comida",
+                normalPrice: 100.00,
+                appPrice: 80.00
+            },
+            {
+                name: "Camiseta Básica",
+                category: "Ropa",
+                normalPrice: 200.00,
+                appPrice: 150.00
+            },
+            {
+                name: "Boleto de Bus (Ida)",
+                category: "Transporte",
+                normalPrice: 20.00,
+                appPrice: 15.00
+            },
+            {
+                name: "Café Americano",
+                category: "Comida",
+                normalPrice: 50.00,
+                appPrice: 35.00
+            },
+            {
+                name: "Entrada a Museo",
+                category: "Entretenimiento",
+                normalPrice: 80.00,
+                appPrice: 60.00
+            },
+            {
+                name: "Pantalón Jeans",
+                category: "Ropa",
+                normalPrice: 300.00,
+                appPrice: 240.00
+            },
+            {
+                name: "Taxi (5km)",
+                category: "Transporte",
+                normalPrice: 100.00,
+                appPrice: 85.00
+            },
+            {
+                name: "Helado Familiar",
+                category: "Comida",
+                normalPrice: 120.00,
+                appPrice: 90.00
+            },
+            {
+                name: "Libro de Bolsillo",
+                category: "Otros",
+                normalPrice: 150.00,
+                appPrice: 110.00
+            }
+        ];
+
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let chart = null;
+
+        const loginSection = document.getElementById('loginSection');
+        const mainContent = document.getElementById('mainContent');
+        const productItems = document.getElementById('productItems');
+        const listItems = document.getElementById('listItems');
+        const savingsAmount = document.getElementById('savingsAmount');
+        const ctx = document.getElementById('spendingChart').getContext('2d');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const purchaseDateInput = document.getElementById('purchaseDate');
+
+        // Verificar si está logueado
+        function checkLogin() {
+            if (localStorage.getItem('loggedIn') === 'true') {
+                loginSection.style.display = 'none';
+                mainContent.style.display = 'block';
+                renderProducts();
+                renderExpenses();
+                // Establecer fecha actual por defecto
+                purchaseDateInput.value = new Date().toISOString().split('T')[0];
+            } else {
+                loginSection.style.display = 'block';
+                mainContent.style.display = 'none';
+            }
+        }
+
+        // Renderizar lista de productos
+        function renderProducts() {
+            productItems.innerHTML = '';
+            products.forEach(product => {
+                const div = document.createElement('div');
+                div.className = 'product-item';
+                const savings = product.normalPrice - product.appPrice;
+                div.innerHTML = `
+                    <div class="product-info">
+                        <h4>${product.name}</h4>
+                        <p>Categoría: ${product.category}</p>
+                    </div>
+                    <div class="prices">
+                        <div class="normal-price">Normal: $${product.normalPrice.toFixed(2)}</div>
+                        <div class="app-price">App: $${product.appPrice.toFixed(2)} (Ahorro: $${savings.toFixed(2)})</div>
+                    </div>
+                    <button class="add-btn" onclick="addExpense('${product.name}', '${product.category}', ${product.normalPrice}, ${product.appPrice})">Agregar Compra</button>
+                `;
+                productItems.appendChild(div);
+            });
+        }
+
+        // Agregar gasto desde producto
+        function addExpense(name, category, normalPrice, appPrice) {
+            const date = purchaseDateInput.value;
+            if (!date) {
+                alert('Selecciona una fecha de compra.');
+                return;
+            }
+
+            const savings = normalPrice - appPrice;
+            expenses.push({
+                name,
+                category,
+                normalPrice,
+                appPrice,
+                date,
+                savings
+            });
+
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenses();
+            alert(`¡Agregado! Ahorraste $${savings.toFixed(2)} en ${name}.`);
+        }
+
+        // Login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'admin' && password === 'password') {
+                localStorage.setItem('loggedIn', 'true');
+                loginError.style.display = 'none';
+                checkLogin();
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Logout
+        function logout() {
+            localStorage.setItem('loggedIn', 'false');
+            localStorage.removeItem('expenses');
+            expenses = [];
+            if (chart) chart.destroy();
+            checkLogin();
+        }
+
+        // Renderizar lista de gastos
+        function renderExpenses() {
+            listItems.innerHTML = '';
+            expenses.forEach((expense, index) => {
+                const div = document.createElement('div');
+                div.className = 'expense-item';
+                div.innerHTML = `
+                    <span>${expense.name} (${expense.category}) - ${expense.date}: $${expense.appPrice.toFixed(2)} (Ahorro: $${expense.savings.toFixed(2)})</span>
+                    <button class="delete-btn" onclick="deleteExpense(${index})">Eliminar</button>
+                `;
+                const savingsSpan = div.querySelector('span');
+                savingsSpan.innerHTML += ` <span class="savings-highlight">¡Ahorraste!</span>`;
+                listItems.appendChild(div);
+            });
+            updateTotalSavings();
+            updateChart();
+        }
+
+        // Actualizar ahorro total
+        function updateTotalSavings() {
+            const total = expenses.reduce((sum, exp) => sum + exp.savings, 0);
+            savingsAmount.textContent = total.toFixed(2);
+        }
+
+        // Actualizar gráfico con tonos de verde
+        function updateChart() {
+            const categorySums = {};
+            expenses.forEach(exp => {
+                categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.appPrice;
+            });
+
+            const labels = Object.keys(categorySums);
+            const data = Object.values(categorySums);
+            const greenShades = ['#C8E6C9', '#AED581', '#81C784', '#66BB6A', '#4CAF50', '#43A047'];
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            if (labels.length > 0) {
+                chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: greenShades.slice(0, labels.length)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#2E7D32'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Gastos por Categoría (Precio App)',
+                                color: '#388E3C',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Eliminar gasto
+        function deleteExpense(index) {
+            expenses.splice(index, 1);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenses();
+        }
+
+        // Inicializar
+        checkLogin();
+    </script>
+</body>
+</html>
