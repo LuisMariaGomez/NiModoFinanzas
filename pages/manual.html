@@ -26,74 +26,6 @@
             border-bottom: 2px solid #81C784;
             padding-bottom: 10px;
         }
-        h3 {
-            color: #4CAF50;
-            margin-top: 20px;
-        }
-        #productsList {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            margin-bottom: 25px;
-            transition: transform 0.3s ease;
-        }
-        #productsList:hover {
-            transform: translateY(-2px);
-        }
-        .product-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #F1F8E9;
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #4CAF50;
-        }
-        .product-info {
-            flex: 1;
-        }
-        .product-info h4 {
-            margin: 0 0 5px 0;
-            color: #2E7D32;
-        }
-        .product-info p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-        .prices {
-            text-align: right;
-            margin-left: 20px;
-        }
-        .normal-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 14px;
-        }
-        .app-price {
-            color: #4CAF50;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .add-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s ease;
-        }
-        .add-btn:hover {
-            background: linear-gradient(135deg, #45a049 0%, #388E3C 100%);
-        }
-        .add-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
         form {
             background: white;
             padding: 25px;
@@ -111,7 +43,7 @@
             font-weight: bold;
             color: #388E3C;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -121,7 +53,7 @@
             font-size: 16px;
             transition: border-color 0.3s ease;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #4CAF50;
             box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
@@ -228,12 +160,6 @@
             margin-top: 10px;
             font-weight: bold;
         }
-        .date-form {
-            background: #F1F8E9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
@@ -253,19 +179,31 @@
 
     <div id="mainContent">
         <h1>Ni Modo Finanzas</h1>
-        <a href="./pages/manual.html"><button id="logoutBtn">Carga Manual</button></a>
+        <a href="/index.html"><button id="logoutBtn">Home</button></a>
         <button id="logoutBtn" onclick="logout()">Cerrar Sesión</button>
         
-        <div class="date-form">
-            <label for="purchaseDate">Fecha de Compra:</label>
-            <input type="date" id="purchaseDate" required>
-        </div>
-        
-        <div id="productsList">
-            <h2>Productos y Ofertas Exclusivas de la App</h2>
-            <p>Selecciona y agrega productos para documentar tus gastos y ahorros. Precios en $.</p>
-            <div id="productItems"></div>
-        </div>
+        <form id="expenseForm">
+            <label for="category">Categoría:</label>
+            <select id="category" required>
+                <option value="">Selecciona una categoría</option>
+                <option value="Comida">Comida</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Entretenimiento">Entretenimiento</option>
+                <option value="Ropa">Ropa</option>
+                <option value="Otros">Otros</option>
+            </select>
+            
+            <label for="originalPrice">Precio Original ($):</label>
+            <input type="number" id="originalPrice" step="0.01" min="0" required>
+            
+            <label for="offerPrice">Precio Oferta ($):</label>
+            <input type="number" id="offerPrice" step="0.01" min="0" placeholder="Deja vacío si no hay oferta">
+            
+            <label for="date">Fecha:</label>
+            <input type="date" id="date" required>
+            
+            <button type="submit">Agregar Gasto</button>
+        </form>
         
         <div id="expensesList">
             <h2>Gastos Documentados</h2>
@@ -283,141 +221,28 @@
     </div>
 
     <script>
-        // Lista de productos predefinidos con precios
-        const products = [
-            {
-                name: "Entrada de Cine (Adulto)",
-                category: "Entretenimiento",
-                normalPrice: 150.00,
-                appPrice: 120.00
-            },
-            {
-                name: "Hamburguesa Combo",
-                category: "Comida",
-                normalPrice: 100.00,
-                appPrice: 80.00
-            },
-            {
-                name: "Camiseta Básica",
-                category: "Ropa",
-                normalPrice: 200.00,
-                appPrice: 150.00
-            },
-            {
-                name: "Boleto de Bus (Ida)",
-                category: "Transporte",
-                normalPrice: 20.00,
-                appPrice: 15.00
-            },
-            {
-                name: "Café Americano",
-                category: "Comida",
-                normalPrice: 50.00,
-                appPrice: 35.00
-            },
-            {
-                name: "Entrada a Museo",
-                category: "Entretenimiento",
-                normalPrice: 80.00,
-                appPrice: 60.00
-            },
-            {
-                name: "Pantalón Jeans",
-                category: "Ropa",
-                normalPrice: 300.00,
-                appPrice: 240.00
-            },
-            {
-                name: "Taxi (5km)",
-                category: "Transporte",
-                normalPrice: 100.00,
-                appPrice: 85.00
-            },
-            {
-                name: "Helado Familiar",
-                category: "Comida",
-                normalPrice: 120.00,
-                appPrice: 90.00
-            },
-            {
-                name: "Libro de Bolsillo",
-                category: "Otros",
-                normalPrice: 150.00,
-                appPrice: 110.00
-            }
-        ];
-
         let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
         let chart = null;
 
         const loginSection = document.getElementById('loginSection');
         const mainContent = document.getElementById('mainContent');
-        const productItems = document.getElementById('productItems');
+        const form = document.getElementById('expenseForm');
         const listItems = document.getElementById('listItems');
         const savingsAmount = document.getElementById('savingsAmount');
         const ctx = document.getElementById('spendingChart').getContext('2d');
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
-        const purchaseDateInput = document.getElementById('purchaseDate');
 
         // Verificar si está logueado
         function checkLogin() {
             if (localStorage.getItem('loggedIn') === 'true') {
                 loginSection.style.display = 'none';
                 mainContent.style.display = 'block';
-                renderProducts();
                 renderExpenses();
-                // Establecer fecha actual por defecto
-                purchaseDateInput.value = new Date().toISOString().split('T')[0];
             } else {
                 loginSection.style.display = 'block';
                 mainContent.style.display = 'none';
             }
-        }
-
-        // Renderizar lista de productos
-        function renderProducts() {
-            productItems.innerHTML = '';
-            products.forEach(product => {
-                const div = document.createElement('div');
-                div.className = 'product-item';
-                const savings = product.normalPrice - product.appPrice;
-                div.innerHTML = `
-                    <div class="product-info">
-                        <h4>${product.name}</h4>
-                        <p>Categoría: ${product.category}</p>
-                    </div>
-                    <div class="prices">
-                        <div class="normal-price">Normal: $${product.normalPrice.toFixed(2)}</div>
-                        <div class="app-price">App: $${product.appPrice.toFixed(2)} (Ahorro: $${savings.toFixed(2)})</div>
-                    </div>
-                    <button class="add-btn" onclick="addExpense('${product.name}', '${product.category}', ${product.normalPrice}, ${product.appPrice})">Agregar Compra</button>
-                `;
-                productItems.appendChild(div);
-            });
-        }
-
-        // Agregar gasto desde producto
-        function addExpense(name, category, normalPrice, appPrice) {
-            const date = purchaseDateInput.value;
-            if (!date) {
-                alert('Selecciona una fecha de compra.');
-                return;
-            }
-
-            const savings = normalPrice - appPrice;
-            expenses.push({
-                name,
-                category,
-                normalPrice,
-                appPrice,
-                date,
-                savings
-            });
-
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            renderExpenses();
-            alert(`¡Agregado! Ahorraste $${savings.toFixed(2)} en ${name}.`);
         }
 
         // Login
@@ -426,6 +251,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
+            // Credenciales hardcodeadas para simplicidad (en producción, usar backend)
             if (username === 'admin' && password === 'password') {
                 localStorage.setItem('loggedIn', 'true');
                 loginError.style.display = 'none';
@@ -438,7 +264,7 @@
         // Logout
         function logout() {
             localStorage.setItem('loggedIn', 'false');
-            localStorage.removeItem('expenses');
+            localStorage.removeItem('expenses'); // Opcional: limpiar datos al logout
             expenses = [];
             if (chart) chart.destroy();
             checkLogin();
@@ -450,12 +276,16 @@
             expenses.forEach((expense, index) => {
                 const div = document.createElement('div');
                 div.className = 'expense-item';
+                const actualPrice = expense.offerPrice || expense.originalPrice;
+                const savings = expense.originalPrice - actualPrice;
                 div.innerHTML = `
-                    <span>${expense.name} (${expense.category}) - ${expense.date}: $${expense.appPrice.toFixed(2)} (Ahorro: $${expense.savings.toFixed(2)})</span>
+                    <span>${expense.category} - ${expense.date}: $${actualPrice.toFixed(2)} (Ahorro: $${savings.toFixed(2)})</span>
                     <button class="delete-btn" onclick="deleteExpense(${index})">Eliminar</button>
                 `;
-                const savingsSpan = div.querySelector('span');
-                savingsSpan.innerHTML += ` <span class="savings-highlight">¡Ahorraste!</span>`;
+                if (savings > 0) {
+                    const savingsSpan = div.querySelector('span');
+                    savingsSpan.innerHTML += ` <span class="savings-highlight">¡Ahorraste!</span>`;
+                }
                 listItems.appendChild(div);
             });
             updateTotalSavings();
@@ -464,7 +294,10 @@
 
         // Actualizar ahorro total
         function updateTotalSavings() {
-            const total = expenses.reduce((sum, exp) => sum + exp.savings, 0);
+            const total = expenses.reduce((sum, exp) => {
+                const actual = exp.offerPrice || exp.originalPrice;
+                return sum + (exp.originalPrice - actual);
+            }, 0);
             savingsAmount.textContent = total.toFixed(2);
         }
 
@@ -472,7 +305,8 @@
         function updateChart() {
             const categorySums = {};
             expenses.forEach(exp => {
-                categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.appPrice;
+                const actual = exp.offerPrice || exp.originalPrice;
+                categorySums[exp.category] = (categorySums[exp.category] || 0) + actual;
             });
 
             const labels = Object.keys(categorySums);
@@ -505,7 +339,7 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Gastos por Categoría (Precio App)',
+                                text: 'Gastos por Categoría (Actual Gastado)',
                                 color: '#388E3C',
                                 font: {
                                     size: 16,
@@ -524,6 +358,33 @@
             localStorage.setItem('expenses', JSON.stringify(expenses));
             renderExpenses();
         }
+
+        // Manejar formulario de gastos
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const category = document.getElementById('category').value;
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
+            const offerPriceInput = document.getElementById('offerPrice').value;
+            const offerPrice = offerPriceInput ? parseFloat(offerPriceInput) : originalPrice;
+            const date = document.getElementById('date').value;
+
+            if (offerPrice > originalPrice) {
+                alert('El precio de oferta no puede ser mayor al original.');
+                return;
+            }
+
+            expenses.push({
+                category,
+                originalPrice,
+                offerPrice: offerPrice !== originalPrice ? offerPrice : null,
+                date,
+                savings: originalPrice - offerPrice
+            });
+
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            form.reset();
+            renderExpenses();
+        });
 
         // Inicializar
         checkLogin();
